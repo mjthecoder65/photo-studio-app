@@ -1,8 +1,8 @@
 import os
+from functools import lru_cache
 from typing import Optional
 
 from google.cloud import secretmanager
-from functools import lru_cache
 
 
 class SecretManagerService:
