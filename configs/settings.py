@@ -115,13 +115,12 @@ def get_settings() -> Settings:
     Returns:
         Settings: Application settings with secrets loaded
     """
+
     settings = Settings()
 
-    # Load secrets from Secret Manager if enabled
     if settings.USE_SECRET_MANAGER:
         settings.load_secrets_from_secret_manager()
 
-    # Validate required secrets are present
     if not settings.DATABASE_URL:
         raise ValueError("DATABASE_URL is required")
 
