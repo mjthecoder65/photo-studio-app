@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     APP_ENV: str = DeploymentEnvironment.DEV
     SERVER_HOST: str = "0.0.0.0"
     SERVER_PORT: int = 8080
-    APP_NAME: str = "Demo-App Service"
+    APP_NAME: str = "Photo Studio App"
     APP_VERSION: str = "v1"
 
     # Google Cloud Settings
