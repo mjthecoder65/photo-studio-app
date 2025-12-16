@@ -41,9 +41,9 @@ def create_secret(
     """Create a new secret."""
     try:
         result = secret_manager.create_secret(secret_id, secret_value)
-        logger.info(f"✅ Secret '{secret_id}' created successfully: {result}")
+        logger.info(f"secret '{secret_id}' created successfully: {result}")
     except Exception as e:
-        logger.error(f"❌ Error creating secret: {e}")
+        logger.error(f"error creating secret: {e}")
         sys.exit(1)
 
 
@@ -53,9 +53,9 @@ def update_secret(
     """Update an existing secret."""
     try:
         result = secret_manager.update_secret(secret_id, secret_value)
-        logger.info(f"✅ Secret '{secret_id}' updated successfully: {result}")
+        logger.info(f"secret '{secret_id}' updated successfully: {result}")
     except Exception as e:
-        logger.error(f"❌ Error updating secret: {e}")
+        logger.error(f"error updating secret: {e}")
         sys.exit(1)
 
 
@@ -65,7 +65,7 @@ def get_secret(secret_manager: SecretManagerService, secret_id: str):
         value = secret_manager.get_secret(secret_id)
         print(f"Secret '{secret_id}': {value}")
     except Exception as e:
-        print(f"❌ Error getting secret: {e}")
+        print(f"error getting secret: {e}")
         sys.exit(1)
 
 
@@ -73,9 +73,9 @@ def delete_secret(secret_manager: SecretManagerService, secret_id: str):
     """Delete a secret."""
     try:
         secret_manager.delete_secret(secret_id)
-        print(f"✅ Secret '{secret_id}' deleted successfully")
+        print(f"secret '{secret_id}' deleted successfully")
     except Exception as e:
-        print(f"❌ Error deleting secret: {e}")
+        print(f"error deleting secret: {e}")
         sys.exit(1)
 
 
@@ -96,32 +96,32 @@ def setup_all_secrets(secret_manager: SecretManagerService):
         "gemini-api-key": "GEMINI_API_KEY",
     }
 
-    print("🔐 Setting up secrets in Google Cloud Secret Manager...\n")
+    print("setting up secrets in Google Cloud Secret Manager...\n")
 
     for secret_id, env_var in secrets_mapping.items():
         value = os.getenv(env_var)
 
         if not value:
-            print(f"⚠️  Skipping '{secret_id}': {env_var} not found in environment")
+            print(f"skipping '{secret_id}': {env_var} not found in environment")
             continue
 
         try:
             # Try to create the secret
             secret_manager.create_secret(secret_id, value)
-            print(f"✅ Created secret: {secret_id}")
+            print(f"created secret: {secret_id}")
         except Exception as e:
             # If creation fails, try to update instead
             if "already exists" in str(e).lower():
                 try:
                     secret_manager.update_secret(secret_id, value)
-                    print(f"✅ Updated secret: {secret_id}")
+                    print(f"updated secret: {secret_id}")
                 except Exception as update_error:
-                    print(f"❌ Failed to update '{secret_id}': {update_error}")
+                    print(f"failed to update '{secret_id}': {update_error}")
             else:
-                print(f"❌ Failed to create '{secret_id}': {e}")
+                print(f"failed to create '{secret_id}': {e}")
 
-    print("\n✅ Secret setup complete!")
-    print("\n📝 Next steps:")
+    print("\n Secret setup complete!")
+    print("\n Next steps:")
     print("1. Set USE_SECRET_MANAGER=true in your production environment")
     print("2. Remove sensitive values from .env file in production")
     print("3. Ensure your service account has 'Secret Manager Secret Accessor' role")
@@ -161,7 +161,7 @@ def main():
     project_id = args.project_id or os.getenv("GCS_PROJECT_ID")
     if not project_id:
         logger.error(
-            "❌ Error: GCS_PROJECT_ID must be set in environment or passed with --project-id"
+            "Error: GCS_PROJECT_ID must be set in environment or passed with --project-id"
         )
         sys.exit(1)
 
@@ -169,25 +169,25 @@ def main():
 
     if args.command == CommandType.CREATE:
         if not args.secret_id or not args.secret_value:
-            print("❌ Error: create requires <secret-id> and <secret-value>")
+            print("Error: create requires <secret-id> and <secret-value>")
             sys.exit(1)
         create_secret(secret_manager, args.secret_id, args.secret_value)
 
     elif args.command == CommandType.UPDATE:
         if not args.secret_id or not args.secret_value:
-            print("❌ Error: update requires <secret-id> and <secret-value>")
+            print("Error: update requires <secret-id> and <secret-value>")
             sys.exit(1)
         update_secret(secret_manager, args.secret_id, args.secret_value)
 
     elif args.command == CommandType.GET:
         if not args.secret_id:
-            print("❌ Error: get requires <secret-id>")
+            print("Error: get requires <secret-id>")
             sys.exit(1)
         get_secret(secret_manager, args.secret_id)
 
     elif args.command == CommandType.DELETE:
         if not args.secret_id:
-            print("❌ Error: delete requires <secret-id>")
+            print("Error: delete requires <secret-id>")
             sys.exit(1)
         delete_secret(secret_manager, args.secret_id)
 
