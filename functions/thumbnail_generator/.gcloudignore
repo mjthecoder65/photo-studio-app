@@ -1,0 +1,27 @@
+# This file specifies files that are _not_ uploaded to Google Cloud
+
+# using gcloud. It follows the same syntax as .gitignore
+
+.gcloudignore
+.git
+.gitignore
+**pycache**/
+_.pyc
+_.pyo
+_.pyd
+.Python
+_.so
+_.egg
+_.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.venv
+venv/
+ENV/
+README.md
+\*.md
+.DS_Store
