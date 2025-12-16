@@ -18,7 +18,6 @@ router = APIRouter(prefix=f"/api/{settings.APP_VERSION}/auth", tags=["Authentica
 
 
 def get_user_service(db: AsyncSession = Depends(get_db)) -> UserService:
-    """Dependency to get UserService instance."""
     return UserService(db)
 
 
@@ -117,7 +116,7 @@ async def refresh_token(
         HTTPException 401: If refresh token is invalid or expired
         HTTPException 404: If user no longer exists
     """
-    # Decode and validate the refresh token
+
     payload = decode_token(token_data.refresh_token)
 
     if not payload:
@@ -127,7 +126,6 @@ async def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Verify it's a refresh token
     if payload.get("type") != "refresh":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -135,7 +133,6 @@ async def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Extract user ID from token
     user_id_str = payload.get("sub")
     if not user_id_str:
         raise HTTPException(
@@ -153,7 +150,6 @@ async def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Verify user still exists
     user = await user_service.get_user_by_id(user_id)
     if not user:
         raise HTTPException(
@@ -161,7 +157,6 @@ async def refresh_token(
             detail="User not found",
         )
 
-    # Create new tokens
     new_token_data = {"sub": str(user.id), "email": user.email}
     new_access_token = create_access_token(data=new_token_data)
     new_refresh_token = create_refresh_token(data=new_token_data)
