@@ -21,7 +21,13 @@ dependencies = [
     "google-cloud-firestore (>=2.21.0,<3.0.0)",
     "google-generativeai (==0.8.3)",
     "pillow (>=12.0.0,<13.0.0)",
-    "google-cloud-secret-manager (>=2.25.0,<3.0.0)"
+    "google-cloud-secret-manager (>=2.25.0,<3.0.0)",
+    "opentelemetry-api (>=1.39.1,<2.0.0)",
+    "opentelemetry-sdk (>=1.39.1,<2.0.0)",
+    "opentelemetry-instrumentation-fastapi (>=0.60b1,<0.61)",
+    "opentelemetry-instrumentation-sqlalchemy (>=0.60b1,<0.61)",
+    "opentelemetry-instrumentation-httpx (>=0.60b1,<0.61)",
+    "opentelemetry-exporter-gcp-trace (>=1.11.0,<2.0.0)"
 ]
 
 [build-system]
