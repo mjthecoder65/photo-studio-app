@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    container_name: demo-app-server
+    container_name: photo-studio-server
     command: python main.py
     ports:
       - "8080:8080"
@@ -12,7 +12,7 @@ services:
       - ./:/app
   db:
     image: postgres:15
-    container_name: demo-app-db
+    container_name: photo-studio-db
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -21,7 +21,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - demo_app_db_data:/var/lib/postgresql/data
+      - photo_studio_db_data:/var/lib/postgresql/data
 
 volumes:
-  demo_app_db_data:
+  photo_studio_db_data:
