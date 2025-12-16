@@ -2,9 +2,13 @@ import io
 from typing import BinaryIO
 
 import google.generativeai as genai
+from opentelemetry import trace
 from PIL import Image
 
 from configs.settings import settings
+
+# Get tracer for this module
+tracer = trace.get_tracer(__name__)
 
 
 class AIImageGeneratorService:
@@ -21,33 +25,52 @@ class AIImageGeneratorService:
         response_modalities: list[str] = None,
     ) -> tuple[bytes, str]:
 
-        try:
-            if response_modalities is None:
-                response_modalities = ["IMAGE"]
+        with tracer.start_as_current_span(
+            "generate_image_from_text",
+            attributes={
+                "ai.model": settings.GEMINI_IMAGE_MODEL,
+                "ai.prompt_length": len(prompt),
+                "ai.aspect_ratio": aspect_ratio,
+            },
+        ) as span:
+            try:
+                if response_modalities is None:
+                    response_modalities = ["IMAGE"]
 
-            generation_config = {
-                "response_modalities": response_modalities,
-            }
-            if aspect_ratio:
-                generation_config["image_config"] = {
-                    "aspect_ratio": aspect_ratio,
+                generation_config = {
+                    "response_modalities": response_modalities,
                 }
+                if aspect_ratio:
+                    generation_config["image_config"] = {
+                        "aspect_ratio": aspect_ratio,
+                    }
 
-            response = self.model.generate_content(
-                prompt,
-                generation_config=generation_config,
-            )
-            for part in response.parts:
-                if hasattr(part, "inline_data") and part.inline_data:
-                    image_data = part.inline_data.data
-                    mime_type = part.inline_data.mime_type or "image/png"
+                # Add sub-span for API call
+                with tracer.start_as_current_span("gemini_api_call"):
+                    response = self.model.generate_content(
+                        prompt,
+                        generation_config=generation_config,
+                    )
 
-                    return image_data, mime_type
+                for part in response.parts:
+                    if hasattr(part, "inline_data") and part.inline_data:
+                        image_data = part.inline_data.data
+                        mime_type = part.inline_data.mime_type or "image/png"
 
-            raise Exception("No image generated in response")
+                        # Add attributes to span
+                        span.set_attribute("ai.image_size_bytes", len(image_data))
+                        span.set_attribute("ai.mime_type", mime_type)
+                        span.set_attribute("ai.success", True)
 
-        except Exception as e:
-            raise Exception(f"Failed to generate image: {str(e)}")
+                        return image_data, mime_type
+
+                raise Exception("No image generated in response")
+
+            except Exception as e:
+                span.set_attribute("ai.success", False)
+                span.set_attribute("ai.error", str(e))
+                span.record_exception(e)
+                raise Exception(f"Failed to generate image: {str(e)}")
 
     async def generate_image_from_text_and_image(
         self,
@@ -70,34 +93,56 @@ class AIImageGeneratorService:
         Raises:
             Exception: If image generation fails
         """
-        try:
-            reference_image.seek(0)
-            image_bytes = reference_image.read()
-            img = Image.open(io.BytesIO(image_bytes))
+        with tracer.start_as_current_span(
+            "generate_image_from_text_and_image",
+            attributes={
+                "ai.model": settings.GEMINI_IMAGE_MODEL,
+                "ai.prompt_length": len(prompt),
+                "ai.aspect_ratio": aspect_ratio,
+                "ai.has_reference_image": True,
+            },
+        ) as span:
+            try:
+                reference_image.seek(0)
+                image_bytes = reference_image.read()
+                img = Image.open(io.BytesIO(image_bytes))
 
-            generation_config = {
-                "response_modalities": ["IMAGE"],
-                "image_config": {
-                    "aspect_ratio": aspect_ratio,
-                },
-            }
+                # Add reference image size to span
+                span.set_attribute("ai.reference_image_size_bytes", len(image_bytes))
 
-            response = self.model.generate_content(
-                [img, prompt],
-                generation_config=generation_config,
-            )
+                generation_config = {
+                    "response_modalities": ["IMAGE"],
+                    "image_config": {
+                        "aspect_ratio": aspect_ratio,
+                    },
+                }
 
-            for part in response.parts:
-                if hasattr(part, "inline_data") and part.inline_data:
-                    image_data = part.inline_data.data
-                    mime_type = part.inline_data.mime_type or "image/png"
+                # Add sub-span for API call
+                with tracer.start_as_current_span("gemini_api_call_with_image"):
+                    response = self.model.generate_content(
+                        [img, prompt],
+                        generation_config=generation_config,
+                    )
 
-                    return image_data, mime_type
+                for part in response.parts:
+                    if hasattr(part, "inline_data") and part.inline_data:
+                        image_data = part.inline_data.data
+                        mime_type = part.inline_data.mime_type or "image/png"
 
-            raise Exception("No image generated in response")
+                        # Add attributes to span
+                        span.set_attribute("ai.image_size_bytes", len(image_data))
+                        span.set_attribute("ai.mime_type", mime_type)
+                        span.set_attribute("ai.success", True)
 
-        except Exception as e:
-            raise Exception(f"Failed to generate image from reference: {str(e)}")
+                        return image_data, mime_type
+
+                raise Exception("No image generated in response")
+
+            except Exception as e:
+                span.set_attribute("ai.success", False)
+                span.set_attribute("ai.error", str(e))
+                span.record_exception(e)
+                raise Exception(f"Failed to generate image from reference: {str(e)}")
 
     def get_supported_aspect_ratios(self) -> list[str]:
         """

@@ -54,6 +54,9 @@ class Settings(BaseSettings):
         "image/webp",
     ]
 
+    # Tracing Configuration
+    ENABLE_TRACING: bool = True
+
     @property
     def DEBUG(self) -> bool:
         return self.APP_ENV != DeploymentEnvironment.PROD
@@ -69,10 +72,10 @@ class Settings(BaseSettings):
         This method should be called after Settings initialization
         when USE_SECRET_MANAGER is True.
         """
+
         if not self.USE_SECRET_MANAGER:
             return
 
-        # Import here to avoid circular dependency
         from services.secret_manager import SecretManagerService
 
         secret_manager = SecretManagerService(project_id=self.GCS_PROJECT_ID)
@@ -86,7 +89,6 @@ class Settings(BaseSettings):
                     f"Failed to load DATABASE_URL from Secret Manager: {e}"
                 )
 
-        # Load JWT_SECRET_KEY from Secret Manager
         if not self.JWT_SECRET_KEY:
             try:
                 self.JWT_SECRET_KEY = secret_manager.get_secret("jwt-secret-key")
@@ -95,7 +97,6 @@ class Settings(BaseSettings):
                     f"Failed to load JWT_SECRET_KEY from Secret Manager: {e}"
                 )
 
-        # Load GEMINI_API_KEY from Secret Manager
         if not self.GEMINI_API_KEY:
             try:
                 self.GEMINI_API_KEY = secret_manager.get_secret("gemini-api-key")
