@@ -222,7 +222,7 @@ async def get_album_photos(
         HTTPException 404: If album not found
         HTTPException 403: If user doesn't own the album
     """
-    # Verify ownership
+
     if not await album_service.verify_album_ownership(album_id, current_user.id):
         album_exists = await album_service.album_exists(album_id)
         if not album_exists:
