@@ -164,3 +164,6 @@ alembic/versions/*.pyc
 
 # Env Files
 .env
+
+# ruff cache
+.ruff_cache/

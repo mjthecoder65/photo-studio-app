@@ -1,3 +1,5 @@
+import logging
+
 from opentelemetry import trace
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -9,7 +11,6 @@ from opentelemetry.resourcedetector.gcp_resource_detector import (
 from opentelemetry.sdk.resources import Resource, get_aggregated_resources
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

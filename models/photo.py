@@ -4,9 +4,8 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import Base
