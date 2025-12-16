@@ -20,7 +20,8 @@ dependencies = [
     "google-cloud-storage (==2.14.0)",
     "google-cloud-firestore (>=2.21.0,<3.0.0)",
     "google-generativeai (==0.8.3)",
-    "pillow (>=12.0.0,<13.0.0)"
+    "pillow (>=12.0.0,<13.0.0)",
+    "google-cloud-secret-manager (>=2.25.0,<3.0.0)"
 ]
 
 [build-system]
