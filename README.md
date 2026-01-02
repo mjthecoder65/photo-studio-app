@@ -1,7 +1,5 @@
 # Photo Studio App
 
-[![Deploy](https://github.com/YOUR_ORG/photo-studio/actions/workflows/deploy.yml/badge.svg)](https://github.com/YOUR_ORG/photo-studio/actions/workflows/deploy.yml)
-
 A modern photo management application with AI-powered image generation capabilities, built with FastAPI and deployed on Google Cloud Platform.
 
 ## Features
